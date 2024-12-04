@@ -37,11 +37,15 @@ async function run() {
 
 
     //  all movies
-   
+    app.get('/movie', async (req, res) => {
+        const cursor = movieCollection.find().limit(6);
+        const result = await cursor.toArray();
+        res.send(result);
+    });
 
     app.post('/movie', async (req, res) => {
         const newMovie = req.body;
-        console.log('Adding new movie', newMovie)
+       
 
         const result = await movieCollection.insertOne(newMovie);
         res.send(result);
