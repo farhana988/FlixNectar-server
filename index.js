@@ -38,6 +38,8 @@ async function run() {
     const database = client.db("movieDB");
     const movieCollection = database.collection("movie");
 
+    const favoriteCollection = client.db("movieDB").collection('favorites');
+
     //  all movies
 
     app.get("/allMovie", async (req, res) => {
@@ -71,6 +73,22 @@ async function run() {
       const result = await movieCollection.deleteOne(query);
       res.send(result);
   })
+
+  // add favourite list
+
+  app.get('/favorites/:email', async (req, res) => {
+    const  email  = req.params.email; 
+    const query = { email };
+    const result = await favoriteCollection.find(query).toArray();
+    res.send(result);
+})
+
+
+  app.post("/favorites", async (req, res) => {
+    const newFavorite = req.body;
+    const result = await favoriteCollection.insertOne(newFavorite);
+    res.send(result);
+  });
 
 
 
