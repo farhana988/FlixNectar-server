@@ -68,7 +68,7 @@ async function run() {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
       const options = { upsert: true };
-      const updatedDoc = req.body
+      const updatedDoc = req.body;
       const doc = {
         $set: {
           photo: updatedDoc.photo,
@@ -81,7 +81,7 @@ async function run() {
         },
       };
 
-      const result = await movieCollection.updateOne(filter, doc, options)
+      const result = await movieCollection.updateOne(filter, doc, options);
 
       res.send(result);
     });
@@ -93,7 +93,7 @@ async function run() {
       res.send(result);
     });
 
-    // add favourite list
+    // add favorite list
 
     app.get("/favorites/:email", async (req, res) => {
       const email = req.params.email;
@@ -110,6 +110,17 @@ async function run() {
     });
 
     app.post("/favorites", async (req, res) => {
+      const { email, movieId } = req.body;
+      const existingFavorite = await favoriteCollection.findOne({
+        email,
+        movieId,
+      });
+
+      if (existingFavorite) {
+        console.log("Movie is already in favorites for user");
+        return;
+      }
+
       const newFavorite = req.body;
       const result = await favoriteCollection.insertOne(newFavorite);
       res.send(result);
