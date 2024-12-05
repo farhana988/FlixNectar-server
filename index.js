@@ -31,14 +31,10 @@ async function run() {
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
 
-
-
-
-
     const database = client.db("movieDB");
     const movieCollection = database.collection("movie");
 
-    const favoriteCollection = client.db("movieDB").collection('favorites');
+    const favoriteCollection = client.db("movieDB").collection("favorites");
 
     //  all movies
 
@@ -54,12 +50,12 @@ async function run() {
       res.send(result);
     });
 
-    app.get('/movie/:id', async (req, res) => {
+    app.get("/movie/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await movieCollection.findOne(query);
       res.send(result);
-  })
+    });
 
     app.post("/movie", async (req, res) => {
       const newMovie = req.body;
@@ -67,44 +63,57 @@ async function run() {
       res.send(result);
     });
 
-    app.delete('/movie/:id', async (req, res) => { 
+    // update
+    app.put(`/movie/:id`, async (req, res) => {
       const id = req.params.id;
-      const query = { _id: new ObjectId(id) }
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updatedDoc = req.body
+      const doc = {
+        $set: {
+          photo: updatedDoc.photo,
+          name: updatedDoc.name,
+          genre: updatedDoc.genre,
+          duration: updatedDoc.duration,
+          releaseYear: updatedDoc.releaseYear,
+          rating: updatedDoc.rating,
+          summary: updatedDoc.summary,
+        },
+      };
+
+      const result = await movieCollection.updateOne(filter, doc, options)
+
+      res.send(result);
+    });
+
+    app.delete("/movie/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
       const result = await movieCollection.deleteOne(query);
       res.send(result);
-  })
+    });
 
-  // add favourite list
+    // add favourite list
 
-  app.get('/favorites/:email', async (req, res) => {
-    const  email  = req.params.email; 
-    const query = { email };
-    const result = await favoriteCollection.find(query).toArray();
-    res.send(result);
-})
+    app.get("/favorites/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email };
+      const result = await favoriteCollection.find(query).toArray();
+      res.send(result);
+    });
 
-app.delete('/favorites/:id', async (req, res) => { 
-  const id = req.params.id;
-  const query = { _id: new ObjectId(id) }
-  const result = await  favoriteCollection.deleteOne(query);
-  res.send(result);
-})
+    app.delete("/favorites/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await favoriteCollection.deleteOne(query);
+      res.send(result);
+    });
 
-
-  app.post("/favorites", async (req, res) => {
-    const newFavorite = req.body;
-    const result = await favoriteCollection.insertOne(newFavorite);
-    res.send(result);
-  });
-
-
-
-
-
-
-
-
-
+    app.post("/favorites", async (req, res) => {
+      const newFavorite = req.body;
+      const result = await favoriteCollection.insertOne(newFavorite);
+      res.send(result);
+    });
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
