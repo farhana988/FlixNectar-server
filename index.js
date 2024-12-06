@@ -39,13 +39,27 @@ async function run() {
     //  all movies
 
     app.get("/allMovie", async (req, res) => {
-      const cursor = movieCollection.find();
+      const { searchParams } = req.query;
+
+      let option ={}
+
+      if (searchParams) {
+        option = {
+          name: {
+            $regex: searchParams,
+            $options: "i",
+          },
+        };
+      }
+     
+
+      const cursor = movieCollection.find(option);
       const result = await cursor.toArray();
       res.send(result);
     });
 
     app.get("/movie", async (req, res) => {
-      const cursor = movieCollection.find().limit(6);
+      const cursor = movieCollection.find().sort({ rating: -1 }).limit(6);
       const result = await cursor.toArray();
       res.send(result);
     });
