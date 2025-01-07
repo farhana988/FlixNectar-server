@@ -1,7 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const app = express();``
+const app = express();
 const port = process.env.PORT || 5000;
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 
@@ -30,7 +30,6 @@ async function run() {
     // console.log(
     //   "Pinged your deployment. You successfully connected to MongoDB!"
     // );
-    
 
     const database = client.db("movieDB");
     const movieCollection = database.collection("movie");
@@ -40,9 +39,10 @@ async function run() {
     //  all movies
 
     app.get("/allMovie", async (req, res) => {
-      const { searchParams } = req.query;
+      const { searchParams, sort } = req.query;
 
-      let option ={}
+      let option = {};
+      let sortOption = {};
 
       if (searchParams) {
         option = {
@@ -52,9 +52,13 @@ async function run() {
           },
         };
       }
-     
 
-      const cursor = movieCollection.find(option);
+      if (sort) {
+        sortOption = { rating: sort === "asc" ? 1 : -1 };
+      }
+    
+
+      const cursor = movieCollection.find(option).sort(sortOption);
       const result = await cursor.toArray();
       res.send(result);
     });
@@ -62,6 +66,14 @@ async function run() {
     app.get("/movie", async (req, res) => {
       const cursor = movieCollection.find().sort({ rating: -1 }).limit(6);
       const result = await cursor.toArray();
+      res.send(result);
+    });
+
+    // get my added movies
+    app.get("/myAddedMovies/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email };
+      const result = await movieCollection.find(query).toArray();
       res.send(result);
     });
 
