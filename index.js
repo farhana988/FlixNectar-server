@@ -64,7 +64,7 @@ async function run() {
     });
 
     app.get("/movie", async (req, res) => {
-      const cursor = movieCollection.find().sort({ rating: -1 }).limit(6);
+      const cursor = movieCollection.find().sort({ rating: -1 }).limit(8);
       const result = await cursor.toArray();
       res.send(result);
     });
